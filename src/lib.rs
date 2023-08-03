@@ -1,6 +1,6 @@
 use rand::Rng;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct DNSHeader {
     id: u16,
     flags: u16,
@@ -24,34 +24,11 @@ impl DNSHeader {
     }
 }
 
-impl Default for DNSHeader {
-    fn default() -> Self {
-        DNSHeader {
-            id: 0,
-            flags: 0,
-            num_questions: 0,
-            num_answers: 0,
-            num_authorities: 0,
-            num_additionals: 0,
-        }
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct DNSQuestion {
     name: Vec<u8>,
     type_: u16,
     class: u16,
-}
-
-impl Default for DNSQuestion {
-    fn default() -> Self {
-        DNSQuestion {
-            name: vec![],
-            type_: 0,
-            class: 0,
-        }
-    }
 }
 
 impl DNSQuestion {
