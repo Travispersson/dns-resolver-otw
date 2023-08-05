@@ -12,15 +12,14 @@ use rand::Rng;
 use record_data::RecordData;
 use record_type::RecordType;
 
-pub mod constants;
-pub mod record_type;
-pub mod dns_question;
-pub mod dns_header;
 pub mod class;
-pub mod record_data;
-pub mod dns_record;
+pub mod constants;
+pub mod dns_header;
 pub mod dns_packet;
-
+pub mod dns_question;
+pub mod dns_record;
+pub mod record_data;
+pub mod record_type;
 
 fn decode_name(data: &[u8], cursor: usize) -> Result<(String, usize), Box<dyn Error>> {
     let mut current_pos: usize = cursor;
@@ -70,8 +69,6 @@ fn encode_dns_name(domain_name: &str) -> Vec<u8> {
     bytes
 }
 
-
-
 fn build_query(domain_name: &str, record_type: RecordType, flags: u16) -> Vec<u8> {
     let id = rand::thread_rng().gen_range(0..=std::u16::MAX);
     let header = DNSHeader::new(id, flags);
@@ -83,7 +80,6 @@ fn build_query(domain_name: &str, record_type: RecordType, flags: u16) -> Vec<u8
 
     bytes
 }
-
 
 fn send_query(
     ip: Ipv4Addr,
@@ -114,7 +110,7 @@ fn get_answer(packet: &DNSPacket) -> Option<&DNSRecord> {
     packet
         .answers()
         .iter()
-        .find(|record| matches!(&record.data(), RecordData::A(_)))
+        .find(|record| matches!(&record.type_(), RecordType::A | RecordType::CNAME))
 }
 
 fn get_name_server_ip(packet: &DNSPacket) -> Option<&Ipv4Addr> {
@@ -149,11 +145,13 @@ fn resolve(domain_name: &str, record_type: RecordType) -> Result<Ipv4Addr, Box<d
         let packet = send_query(name_server_ip, domain_name, record_type)?;
 
         if let Some(answer) = get_answer(&packet) {
-            let ip = match answer.data() {
-                RecordData::A(ip) => ip,
-                _ => panic!("Expected type A record!"),
-            };
-            return Ok(*ip);
+            match (answer.data(), answer.type_()) {
+                (RecordData::A(_), RecordType::A) => return Ok(*answer.data().get_A().unwrap()),
+                (RecordData::NS(ref name), RecordType::CNAME) => {
+                    return resolve(name, RecordType::A);
+                }
+                _ => panic!("Expected type A or CNAME record!"),
+            }
         }
 
         if let Some(ip) = get_name_server_ip(&packet) {

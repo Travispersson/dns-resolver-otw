@@ -11,8 +11,7 @@ pub struct DNSHeader {
 }
 
 impl DNSHeader {
-
-    pub fn new(id: u16,  flags: u16) -> Self {
+    pub fn new(id: u16, flags: u16) -> Self {
         Self {
             id,
             flags,

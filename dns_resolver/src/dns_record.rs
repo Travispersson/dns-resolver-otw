@@ -27,7 +27,7 @@ impl DNSRecord {
     pub fn data(&self) -> &RecordData {
         &self.data
     }
-    
+
     pub fn parse((data, cursor): (&[u8], usize)) -> Result<(Self, usize), Box<dyn Error>> {
         let mut current_pos = cursor;
 
@@ -48,7 +48,7 @@ impl DNSRecord {
                 current_pos += 4;
                 RecordData::A(Ipv4Addr::new(a, b, c, d))
             }
-            Ok(RecordType::NS) => {
+            Ok(RecordType::NS) | Ok(RecordType::CNAME) => {
                 let (name, current) = decode_name(data, current_pos)?;
                 current_pos += current;
                 RecordData::NS(name)

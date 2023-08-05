@@ -7,6 +7,7 @@ pub enum RecordType {
     #[default]
     A = 1,
     NS = 2,
+    CNAME = 5,
     NotImplemented,
 }
 
@@ -17,6 +18,7 @@ impl TryFrom<u16> for RecordType {
         let record = match value {
             1 => RecordType::A,
             2 => RecordType::NS,
+            5 => RecordType::CNAME,
             _ => RecordType::NotImplemented,
         };
 

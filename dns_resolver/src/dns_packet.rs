@@ -28,7 +28,7 @@ impl DNSPacket {
     pub fn additionals(&self) -> &[DNSRecord] {
         &self.additionals
     }
-    
+
     pub fn parse(data: &[u8]) -> Result<Self, Box<dyn Error>> {
         DNSPacket::try_from(data)
     }
